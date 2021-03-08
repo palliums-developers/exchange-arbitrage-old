@@ -38,6 +38,8 @@ def check_pair(client: Client, currency_a, currency_b):
     reserves = client.swap_get_reserves_resource()
     reserve = client.get_reserve(reserves, index_a, index_b)
     reserve_a, reserve_b = reserve.coina.value, reserve.coinb.value
+
+    print(currency_b, currency_a, reserve_b / reserve_a)
     #套利a换b
     if reserve_a * price_a < reserve_b * price_b:
         result = get_arbitrage_amount(reserve_a, reserve_b, price_a, price_b)

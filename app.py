@@ -5,5 +5,5 @@ from arbitrage import exchange_arbitrage
 client = create_client()
 while True:
     exchange_arbitrage(client)
-    time.sleep(5)
+    time.sleep(30)
     print("...............")

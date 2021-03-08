@@ -3,8 +3,8 @@ from violas_client import Client
 from violas_client.lbrtypes import NamedChain
 
 
+# JSON_RPC_URL: str = "http://ab.testnet.violas.io:50001"
 JSON_RPC_URL: str = "http://ab.testnet.violas.io:50001"
-CHAIN_ID = NamedChain.TESTING
 FAUCET_ADDR = "00000000000000000042524746554e44"
 CREATE_ACCOUNT_SERVER="https://api4.violas.io/1.0/violas/mint"
 
@@ -23,4 +23,4 @@ ARBITRAGE_SECRET_NAME = "arbitrage-secret"
 
 
 def create_client():
-    return Client.new(JSON_RPC_URL, CHAIN_ID)
+    return Client.new(JSON_RPC_URL)
