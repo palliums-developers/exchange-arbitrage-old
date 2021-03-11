@@ -60,7 +60,7 @@ def do_arbitrage(client: Client, currency_in, currency_out, amount_in):
     if currency_out not in client.get_account_registered_currencies(arbitrage_account.address_hex):
         client.add_currency_to_account(arbitrage_account, currency_out)
     client.swap(arbitrage_account, currency_in, currency_out, amount_in)
-    try_back_coin(currency_out)
+    try_back_coin(client, arbitrage_account, currency_out)
 
 
 def exchange_arbitrage(client: Client):
