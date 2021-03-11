@@ -53,6 +53,7 @@ def check_pair(client: Client, currency_a, currency_b):
     return None, None
 
 def do_arbitrage(client: Client, currency_in, currency_out, amount_in):
+    print("do_arbitrage", currency_in, currency_out, amount_in)
     balance = client.get_balance(arbitrage_account.address_hex, currency_in)
     if balance is None or balance < amount_in:
         try_apply_coin(client, arbitrage_account, currency_in, amount_in, http_client)
