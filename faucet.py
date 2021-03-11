@@ -8,7 +8,7 @@ from oracle import get_currency_price
 
 
 last_apply_times = {}
-APPLY_INTERVAL = 60*60
+APPLY_INTERVAL = 60*60*60
 
 MAX_OWN_VALUE = 10_000_000_000
 KEEP_VALUE = 1_000_000_000
