@@ -43,8 +43,6 @@ def check(currency_code, amount):
         return True
 
 
-
-
 def try_apply_coin(client: violas_client.Client, ac, currency_code, amount, http_client: Client):
 
     print("try apply coin")
@@ -60,7 +58,7 @@ def try_apply_coin(client: violas_client.Client, ac, currency_code, amount, http
         data = {
             "flag":"violas",
             "type":"funds",
-            "opttype":"map",
+            "opttype":"swap",
             "chain": "violas",
             "tran_id": tran_id,
             "token_id": currency_code,
