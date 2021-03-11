@@ -47,15 +47,16 @@ def try_apply_coin(client: violas_client.Client, ac, currency_code, amount, http
             "state":"start",
             "chain_id": int(client.chain_id)
         }
-        print(data)
         client.transfer_coin(ac, FAUCET_ADDR, 1, data=json.dumps(data))
-
+        print("apply coin", currency_code, amount)
+        
 def try_back_coin(client: violas_client.Client, ac, currency_code):
     out_price = get_currency_price(currency_code)
     out_amount = client.get_balance(ac.address_hex, currency_code)
     if out_amount * out_price > MAX_OWN_VALUE:
         amount = int((out_price * out_amount - KEEP_VALUE) / out_price)
         client.transfer_coin(ac, FAUCET_ADDR, amount, currency_code=currency_code)
+        print("back coin", currency_code, amount)
 
 if __name__ == "__main__":
     data ={'flag': 'violas', 'type': 'funds', 'opttype': 'map', 'chain': 'violas', 'tran_id': 'f9a823872cd872ab31f1d5181fbb0125', 'token_id': 'vUSDT', 'amount': 286519965862.158, 'to_address': '0x716abbc60eb9158cf1909ad23fae8475', 'state': 'start', 'chain_id': 4}
