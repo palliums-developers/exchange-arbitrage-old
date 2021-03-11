@@ -49,7 +49,7 @@ def try_apply_coin(client: violas_client.Client, ac, currency_code, amount, http
         }
         client.transfer_coin(ac, FAUCET_ADDR, 1, data=json.dumps(data))
         print("apply coin", currency_code, amount)
-        
+
 def try_back_coin(client: violas_client.Client, ac, currency_code):
     out_price = get_currency_price(currency_code)
     out_amount = client.get_balance(ac.address_hex, currency_code)
