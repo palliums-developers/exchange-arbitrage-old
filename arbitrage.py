@@ -4,7 +4,7 @@ from sympy.abc import x, y
 
 from oracle import get_currency_price
 from account import get_arbitrage_account
-from faucet import try_apply_coin, try_back_coin
+from faucet import try_apply_coin, try_back_coin, reset_apply_time
 from http_client import Client as HttpClient
 from network import CREATE_ACCOUNT_SERVER
 
@@ -61,6 +61,7 @@ def do_arbitrage(client: Client, currency_in, currency_out, amount_in):
     if currency_out not in client.get_account_registered_currencies(arbitrage_account.address_hex):
         client.add_currency_to_account(arbitrage_account, currency_out)
     client.swap(arbitrage_account, currency_in, currency_out, amount_in)
+    reset_apply_time(currency_in)
     try_back_coin(client, arbitrage_account, currency_out)
 
 

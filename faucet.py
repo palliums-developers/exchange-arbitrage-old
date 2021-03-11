@@ -14,22 +14,43 @@ MAX_OWN_VALUE = 10_000_000_000
 KEEP_VALUE = 1_000_000_000
 
 def get_apply_time(currency_code):
-    return last_apply_times.get(currency_code, 0)
+    pair = last_apply_times.get(currency_code)
+    if pair is None:
+        return 0
+    return pair[1]
 
-def set_apply_time(currency_code, t):
-    last_apply_times[currency_code] = t
+def get_apply_amount(currency_code):
+    pair = last_apply_times.get(currency_code)
+    if pair is None:
+        return 0
+    return pair[0]
+
+def set_apply_time(currency_code, t, amount):
+    last_apply_times[currency_code] = (amount,t)
 
 def reset_apply_time(currency_code):
-    last_apply_times[currency_code] = 0
+    last_apply_times[currency_code] = (0, 0)
+
+def check(currency_code, amount):
+    last_apply_time = get_apply_time(currency_code)
+    last_apply_amount = get_apply_amount(currency_code)
+    cur_time = time.time()
+    if last_apply_time == 0:
+        return True
+    if cur_time - last_apply_time > APPLY_INTERVAL:
+        return True
+    if last_apply_amount < amount:
+        return True
+
+
+
 
 def try_apply_coin(client: violas_client.Client, ac, currency_code, amount, http_client: Client):
     if client.get_account_state(ac.address) is None:
         http_client.try_create_child_vasp_account(ac)
 
-    last_apply_time = get_apply_time(currency_code)
-    cur_time = time.time()
-    if last_apply_time == 0 or cur_time - last_apply_time > APPLY_INTERVAL and client.get_balance(FAUCET_ADDR, currency_code) > amount:
-        set_apply_time(currency_code, cur_time)
+    if check(currency_code, amount) and client.get_balance(FAUCET_ADDR, currency_code) > amount:
+        set_apply_time(currency_code, time.time(), amount)
         tran_id = f"{os.urandom(16).hex()}"
         # 添加币种支持
         if currency_code not in client.get_account_registered_currencies(ac.address):

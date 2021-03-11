@@ -9,4 +9,3 @@ client.add_currency_to_account(a1, "vUSDT")
 client.swap(a1, "vBTC", "vUSDT", 1_000_000_00)
 
 
-
