@@ -51,7 +51,7 @@ def try_apply_coin(client: violas_client.Client, ac, currency_code, amount, http
         print("apply coin", currency_code, amount)
 
 def try_back_coin(client: violas_client.Client, ac, currency_code):
-    out_price = get_currency_price(currency_code)
+    out_price = get_currency_price(client, currency_code)
     out_amount = client.get_balance(ac.address_hex, currency_code)
     if out_amount * out_price > MAX_OWN_VALUE:
         amount = int((out_price * out_amount - KEEP_VALUE) / out_price)
