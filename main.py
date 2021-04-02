@@ -1,14 +1,10 @@
-from violas_client import Client, Wallet
-from account import get_arbitrage_account
+from network import *
+from cli.eth import Client
+from eth_account import Account
 
-# ac = get_arbitrage_account()
-# print(ac.address_hex)
-# client = Client("violas_testnet")
-# wallet = Wallet.new()
-# a1 = wallet.new_account()
-# client.mint_coin(a1.address_hex, 100_000_000_000, auth_key_prefix=a1.auth_key_prefix, currency_code="vBTC")
-# client.add_currency_to_account(a1, "vUSDT")
-# client.swap(a1, "vBTC", "vUSDT", 1_000_000_00)
+to_addr = "0x4d6Bb4ed029B33cF25D0810b029bd8B1A6bcAb7B"
 
-code = "7b22666c6167223a202276696f6c6173222c202274797065223a202266756e6473222c20226f707474797065223a20226d6170222c2022636861696e223a202276696f6c6173222c20227472616e5f6964223a20223436323533346630323937353261313166323732343836636539653836616337222c2022746f6b656e5f6964223a202276425443222c2022616d6f756e74223a2035313735322c2022746f5f61646472657373223a202230783731366162626336306562393135386366313930396164323366616538343735222c20227374617465223a20227374617274227d"
-print(bytes.fromhex(code))
+cli = Client(url)
+sender = Account.from_key(eth_private_key)
+cli.transfer(sender, to_addr, "vlstusdt", 234325)
+

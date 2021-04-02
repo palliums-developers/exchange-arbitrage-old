@@ -8,7 +8,6 @@ from faucet import try_apply_coin, try_back_coin, reset_apply_time
 from http_client import Client as HttpClient
 from network import CREATE_ACCOUNT_SERVER
 
-
 MIN_ARBITRAGE_VALUE = 10_000
 
 arbitrage_account = get_arbitrage_account()

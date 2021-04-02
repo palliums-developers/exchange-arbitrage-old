@@ -2,9 +2,9 @@ import os
 from violas_client import Client
 from violas_client.lbrtypes import NamedChain
 
-
+'''violas'''
 # JSON_RPC_URL: str = "http://ab.testnet.violas.io:50001"
-JSON_RPC_URL: str = "http://ab.testnet.violas.io:50001"
+JSON_RPC_URL: str = "http://13.77.137.84:50001"
 FAUCET_ADDR = "00000000000000000042524746554e44"
 CREATE_ACCOUNT_SERVER="https://api4.violas.io/1.0/violas/mint"
 
@@ -21,6 +21,17 @@ VAULT_NAME = "violas-test-liquidator"
 ARBITRAGE_SECRET_NAME = "arbitrage-secret"
 
 
+'''btc'''
+
+'''eth'''
+eth_private_key = "8d14e57809310583f206c425067e4def8e7c11bfd36f958e071bbd1a01f1b043"
+
+
+'''binance'''
+API_KEY = "ORa5qpFXZ0028PkOLCiH8tC6lojJsvT6FoNwuTU7dA3cjhwlR0eRHMy005zWOyGp"
+API_SECRET = "xvJ41OUQDGqUJwAROkxA1lnNq1a4rWCLOetNO8mG0msjyp8DajJ7AvFmmfSsojDU"
+
+url = "http://127.0.0.1:10001/"
 
 def create_client():
     return Client.new(JSON_RPC_URL)
