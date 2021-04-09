@@ -1,52 +1,98 @@
-import json
 from web3 import Web3
-from eth_account.signers.local import LocalAccount
+from network import eth_url_prefix, contracts, e2v_contract_addr
 
-from .http import Client as HClient
+class Client:
 
-project_id = "63f370f2e4dc41c5bd6a6f2234435300"
-project_secret = "33d95e9759734ba6b0a296c6af50d104"
-eth_url_prefix = f"https://kovan.infura.io/v3/{project_id}"
+    WAIT_TRANSATION_TIMEOUT = 120
 
-class Client(HClient):
+    def __init__(self):
+        self._w3 = Web3(Web3.HTTPProvider(eth_url_prefix))
+        self._contracts = contracts
 
-    def __init__(self, url, retry=None):
-        super().__init__(url, retry)
-        # self._w3 = Web3(Web3.HTTPProvider(eth_url_prefix))
-        self._w3 = Web3()
-
-    def transfer(self, from_account: LocalAccount, to_addr, token, amount):
+    def get_balance(self, addr, token):
         token = token.lower()
         if token == "eth":
-            return self.eth_send_tx(self.create_eth_tx(from_account, to_addr, amount))
-        return self.eth_send_tx(self.create_erc20_tx(from_account, to_addr, token, amount))
+            return self._w3.eth.get_balance(addr)
+        token_addr, abi = self._get_contract_info(token)
+        contract = self._w3.eth.contract(token_addr, abi=abi)
+        return contract.functions.balanceOf(addr).call()
 
-    def create_eth_tx(self, from_account: LocalAccount, to_address, amount):
+    def transfer(self, priv_key, to_addr, token, amount):
+        token = self._to_standard(token)
+        ac = self._w3.eth.account.from_key(priv_key)
+        if token == "eth":
+            tx = self._create_eth_tx(ac, to_addr, amount)
+        else:
+            tx = self._create_contract_tx(ac, token, "transfer", to_addr, amount)
+        tx_hash = self._w3.eth.send_raw_transaction(tx)
+        self._w3.eth.waitForTransactionReceipt(tx_hash, self.WAIT_TRANSATION_TIMEOUT)
+        return tx_hash
+
+    def to_violas(self, priv_key, violas_addr, token, amount):
+        token = self._to_standard(token)
+        ac = self._w3.eth.account.from_key(priv_key)
+        self.exec_method(priv_key, token, "approve", e2v_contract_addr, amount)
+
+    def exec_method(self, priv_key, token, method, *args):
+        token = self._to_standard(token)
+        ac = self._w3.eth.account.from_key(priv_key)
+        tx = self._create_contract_tx(ac, token, method, *args)
+        tx_hash = self._w3.eth.send_raw_transaction(tx)
+        self._w3.eth.waitForTransactionReceipt(tx_hash, self.WAIT_TRANSATION_TIMEOUT)
+        return tx_hash
+
+    def call_method(self, token, method, *args):
+        token = self._to_standard(token)
+        token_addr, abi = self._get_contract_info(token)
+        contract = self._w3.eth.contract(token_addr, abi=abi)
+        return getattr(contract.functions, method)(*args).call()
+
+    def _create_eth_tx(self, ac, to_addr, amount):
         raw_tx = dict(
-            nonce=self.eth_get_transaction_count(from_account.address),
-            to=to_address,
+            nonce=self._w3.eth.get_transaction_count(ac.address),
+            to=to_addr,
             value=amount,
             data="",
-            gasPrice=self.eth_get_gas_price(),
-            chainId=self.eth_get_chain_id(),
+            gasPrice=self._w3.eth.gas_price or self._w3.eth.gasPrice(),
+            chainId=self._w3.eth.chain_id or self._w3.eth.chainId(),
         )
-        raw_tx["gas"] = self.eth_estimate_gas(json.dumps(raw_tx))
-        signed_tx = from_account.signTransaction(raw_tx)
+        raw_tx["gas"] = self._w3.eth.estimateGas(raw_tx)
+        signed_tx = ac.signTransaction(raw_tx)
         return signed_tx.rawTransaction.hex()
 
-    def create_erc20_tx(self, from_account: LocalAccount, to_addr, token, amount):
-        contract_addr, abi = self.eth_get_contract_info(token)
-        contract_addr = self._w3.toChecksumAddress(contract_addr)
+    def _create_contract_tx(self, ac, token, method, *args):
+        contract_addr, abi = self._get_contract_info(token)
+        print(contract_addr)
         contract = self._w3.eth.contract(contract_addr, abi=abi)
-        data = contract.functions.transfer(to_addr, amount)
-        raw_tx = data.buildTransaction(dict(
-            nonce=self.eth_get_transaction_count(from_account.address),
-            gasPrice=self.eth_get_gas_price(),
-            chainId=self.eth_get_chain_id(),
-            gas = 1,
-        ))
-        raw_tx["from"] = from_account.address
-        raw_tx["gas"] = self.eth_estimate_gas(raw_tx)
-        signed_tx = from_account.signTransaction(raw_tx)
+
+        data = getattr(contract.functions, method)(*args)
+        print(data)
+        print(ac.address)
+        print(data.estimateGas({
+            # "from": ac.address,
+        }))
+
+        raw_tx = data.buildTransaction({
+            "nonce": self._w3.eth.get_transaction_count(ac.address),
+            "gasPrice": self._w3.eth.gas_price or self._w3.eth.gasPrice(),
+            "chainId": self._w3.eth.chain_id or self._w3.eth.chainId(),
+            "gas": data.estimateGas({}),
+        })
+        signed_tx = ac.signTransaction(raw_tx)
         return signed_tx.rawTransaction.hex()
+
+    def _get_contract_info(self, token):
+        info = self._contracts.get(token)
+        if info is None:
+            info = self._w3.eth.contract(token)
+        return info
+
+    def _to_standard(self, token):
+        return token.lower()
+
+
+
+
+
+
 

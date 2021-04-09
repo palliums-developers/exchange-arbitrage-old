@@ -1,6 +1,6 @@
 import json
 import requests
-from .util import Retry, ResponseStatusError
+from cli.util import Retry, ResponseStatusError
 
 class Client:
 
@@ -40,6 +40,12 @@ class Client:
     def btc_send_tx(self, tx):
         return self.btc_execute("sendtx", tx=tx)
 
+    def btc_get_balance(self, addr):
+        return int(self.btc_execute("get_balance", addr=addr))
+
+    def btc_estimate_fee(self, block_height=1):
+        return int(self.btc_execute("estimate_fee", block_height=block_height))
+
     '''............................called internal...............................'''
     def eth_execute(self, method, **params):
         return self.execute("eth", method, params)
@@ -49,7 +55,7 @@ class Client:
 
     def execute(self, chain, method, params):
         return self._retry.execute(
-            lambda :self.execute_without_retry(chain, method, params)
+            lambda:self.execute_without_retry(chain, method, params)
         )
 
     def execute_without_retry(self, chain, method, params):
