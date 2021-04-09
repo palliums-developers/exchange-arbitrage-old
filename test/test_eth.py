@@ -41,27 +41,19 @@ def usdt_addr():
 
 @pytest.fixture
 def tokens():
-    return ("vlstusdt", "e2v")
+    return ("vlstusdt", )
 
 def test_transfer(cli, sender, receiver_addr, tokens):
-    import time
     amount = 78
     for token in tokens:
         s_start = cli.get_balance(sender.addr, token)
         r_start = cli.get_balance(receiver_addr, token)
         cli.transfer(sender.priv_key, receiver_addr, token, amount)
-        time.sleep(30)
         s_end = cli.get_balance(sender.addr, token)
         r_end = cli.get_balance(receiver_addr, token)
         assert s_start - s_end == amount
         assert r_end - r_start == amount
 
-def test_map(cli, sender, tokens):
-    import time
-    amount = 89
-    for token in tokens:
-        cli.exec_method(sender.priv_key, token, "approve", e2v_addr, amount)
-        cli.exec_method(sender.priv_key, token, "transferProof", usdt_addr, violas_addr)
 
 
 

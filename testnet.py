@@ -24,6 +24,13 @@ ARBITRAGE_SECRET_NAME = "arbitrage-secret"
 btc_map_addr = "2N2YasTUdLbXsafHHmyoKUYcRRicRPgUyNB"
 btc_private_key = "66e29f8cd2a77bd09d4b7f83b164e8674b738697c08176f563bbab4852a3dd83"
 
+btc_url_prefix = "https://tbtc1.trezor.io/api/v2/{}/"
+btc_methods = ["tx", "address", "utxo", "sendtx"]
+btc_method_to_urls = {method: btc_url_prefix.format(method) for method in btc_methods}
+btc_method_to_urls["estimatefee"] = "https://tbtc1.trezor.io/api/v1/estimatefee/"
+
+testnet=True
+magicbyte=111
 
 #eth
 '''infura api'''

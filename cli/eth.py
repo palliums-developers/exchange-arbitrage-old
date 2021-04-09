@@ -1,5 +1,5 @@
 from web3 import Web3
-from network import eth_url_prefix, contracts, e2v_contract_addr
+from network import eth_url_prefix, contracts, e2v_token
 
 class Client:
 
@@ -8,6 +8,7 @@ class Client:
     def __init__(self):
         self._w3 = Web3(Web3.HTTPProvider(eth_url_prefix))
         self._contracts = contracts
+        self._e2v_addr, self._e2v_abi = self._get_contract_info(e2v_token)
 
     def get_balance(self, addr, token):
         token = token.lower()
@@ -31,7 +32,13 @@ class Client:
     def to_violas(self, priv_key, violas_addr, token, amount):
         token = self._to_standard(token)
         ac = self._w3.eth.account.from_key(priv_key)
-        self.exec_method(priv_key, token, "approve", e2v_contract_addr, amount)
+        token_addr, _ = self._get_contract_info(token)
+        allownce = self.call_method(token, "allowance", ac.address, self._e2v_addr)
+        if allownce != 0:
+            self.exec_method(priv_key, token, "approve", self._e2v_addr, 0)
+
+        self.exec_method(priv_key, token, "approve", self._e2v_addr, amount)
+        return self.exec_method(priv_key, e2v_token, "transferProof", token_addr, violas_addr)
 
     def exec_method(self, priv_key, token, method, *args):
         token = self._to_standard(token)
@@ -62,21 +69,14 @@ class Client:
 
     def _create_contract_tx(self, ac, token, method, *args):
         contract_addr, abi = self._get_contract_info(token)
-        print(contract_addr)
         contract = self._w3.eth.contract(contract_addr, abi=abi)
-
         data = getattr(contract.functions, method)(*args)
-        print(data)
-        print(ac.address)
-        print(data.estimateGas({
-            # "from": ac.address,
-        }))
 
         raw_tx = data.buildTransaction({
             "nonce": self._w3.eth.get_transaction_count(ac.address),
             "gasPrice": self._w3.eth.gas_price or self._w3.eth.gasPrice(),
             "chainId": self._w3.eth.chain_id or self._w3.eth.chainId(),
-            "gas": data.estimateGas({}),
+            "gas": data.estimateGas({"from": ac.address}),
         })
         signed_tx = ac.signTransaction(raw_tx)
         return signed_tx.rawTransaction.hex()
